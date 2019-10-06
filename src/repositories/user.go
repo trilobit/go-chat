@@ -28,8 +28,10 @@ func NewUser(db *pg.DB) User {
 
 func (u *userRepository) Create(email, pswdHash string) (*models.User, error) {
 	user := models.User{
-		Email: email,
-		Pswd:  pswdHash,
+		Email:     email,
+		Pswd:      pswdHash,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 	if _, err := u.db.Model(&user).Where("email=?", email).SelectOrInsert(); err != nil {
 		return nil, err

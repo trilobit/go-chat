@@ -22,7 +22,7 @@ func NewConfig() (*Config, error) {
 		dbPassword = "password"
 	}
 	if len(dbName) == 0 {
-		dbName = "postgres"
+		dbName = "go_chat"
 	}
 	if len(addr) == 0 {
 		addr = ":9090"
