@@ -9,6 +9,7 @@ require (
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/onsi/ginkgo v1.10.1 // indirect
 	github.com/onsi/gomega v1.7.0 // indirect
+	github.com/stretchr/testify v1.4.0
 	go.uber.org/atomic v1.4.0 // indirect
 	go.uber.org/dig v1.7.0 // indirect
 	go.uber.org/fx v1.9.0

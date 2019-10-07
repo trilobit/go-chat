@@ -3,6 +3,7 @@ package repositories
 import (
 	"time"
 
+	"github.com/go-pg/pg"
 	"github.com/trilobit/go-chat/src/models"
 )
 
@@ -39,6 +40,10 @@ func (u *mockUserRepository) FindByEmail(email string) (*models.User, error) {
 	created := toTime(createdTime)
 	updated := toTime(updatedTime)
 
+	if email != TestEmail {
+		return nil, pg.ErrNoRows
+	}
+
 	user := models.User{
 		ID:        1,
 		Email:     TestEmail,
@@ -52,6 +57,11 @@ func (u *mockUserRepository) FindByEmail(email string) (*models.User, error) {
 func (u *mockUserRepository) FindByToken(token string) (*models.User, error) {
 	created := toTime(createdTime)
 	updated := toTime(updatedTime)
+
+	if token != testToken {
+		return nil, pg.ErrNoRows
+	}
+
 	user := models.User{
 		ID:        1,
 		Email:     TestEmail,

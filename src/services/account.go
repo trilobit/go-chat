@@ -69,7 +69,8 @@ func (as *accountService) Register(email, password string) (*models.User, error)
 func (as *accountService) Authorize(email, password string) (*models.User, error) {
 	user, err := as.repo.FindByEmail(email)
 	if err != nil {
-		return nil, err
+		// as.logger.Errorf("Error in search user: %v", err)
+		return nil, ErrUnauthorized
 	}
 	if !checkPassword(password, user.Pswd) {
 		return nil, ErrUnauthorized

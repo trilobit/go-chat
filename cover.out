@@ -1,0 +1,21 @@
+mode: set
+github.com/trilobit/go-chat/src/services/account.go:45.49,50.2 1 1
+github.com/trilobit/go-chat/src/services/account.go:52.82,53.35 1 1
+github.com/trilobit/go-chat/src/services/account.go:57.2,57.23 1 1
+github.com/trilobit/go-chat/src/services/account.go:61.2,62.16 2 1
+github.com/trilobit/go-chat/src/services/account.go:66.2,66.40 1 1
+github.com/trilobit/go-chat/src/services/account.go:53.35,55.3 1 1
+github.com/trilobit/go-chat/src/services/account.go:57.23,59.3 1 1
+github.com/trilobit/go-chat/src/services/account.go:62.16,64.3 1 0
+github.com/trilobit/go-chat/src/services/account.go:69.83,71.16 2 1
+github.com/trilobit/go-chat/src/services/account.go:75.2,75.41 1 1
+github.com/trilobit/go-chat/src/services/account.go:79.2,80.16 2 1
+github.com/trilobit/go-chat/src/services/account.go:84.2,84.57 1 1
+github.com/trilobit/go-chat/src/services/account.go:88.2,88.18 1 1
+github.com/trilobit/go-chat/src/services/account.go:71.16,74.3 1 1
+github.com/trilobit/go-chat/src/services/account.go:75.41,77.3 1 1
+github.com/trilobit/go-chat/src/services/account.go:80.16,82.3 1 0
+github.com/trilobit/go-chat/src/services/account.go:84.57,86.3 1 0
+github.com/trilobit/go-chat/src/services/account.go:91.52,94.2 2 1
+github.com/trilobit/go-chat/src/services/account.go:96.48,99.2 2 1
+github.com/trilobit/go-chat/src/services/account.go:101.38,104.2 2 1
