@@ -56,7 +56,8 @@ func NewApi(options ApiOptions) {
 	options.Lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			options.Logger.Infof("starting server at: %s", options.Config.ListenAddr)
-			go e.Start(options.Config.ListenAddr)
+
+			go e.Start(options.Config.ListenAddr) // todo why?
 
 			return nil
 		},

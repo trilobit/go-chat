@@ -2,13 +2,24 @@ package providers
 
 import "os"
 
+// Config contains settings for application
 type Config struct {
 	DbUser     string
 	DbPassword string
 	DbName     string
 	ListenAddr string
+	Complexity int
 }
 
+const (
+	defaultDbUser     = "postgres"
+	defaultDbPassword = "password"
+	defaultDbName     = "go_chat"
+	defaultAddr       = ":9090"
+	defaultComplexity = 10
+)
+
+// NewConfig creates instance of config
 func NewConfig() (*Config, error) {
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASWORD")
@@ -16,16 +27,16 @@ func NewConfig() (*Config, error) {
 	addr := os.Getenv("LISTEN_ADDR")
 
 	if len(dbUser) == 0 {
-		dbUser = "postgres"
+		dbUser = defaultDbUser
 	}
 	if len(dbPassword) == 0 {
-		dbPassword = "password"
+		dbPassword = defaultDbPassword
 	}
 	if len(dbName) == 0 {
-		dbName = "go_chat"
+		dbName = defaultDbName
 	}
 	if len(addr) == 0 {
-		addr = ":9090"
+		addr = defaultAddr
 	}
 
 	return &Config{
@@ -33,5 +44,6 @@ func NewConfig() (*Config, error) {
 		DbPassword: dbPassword,
 		DbName:     dbName,
 		ListenAddr: addr,
+		Complexity: defaultComplexity,
 	}, nil
 }

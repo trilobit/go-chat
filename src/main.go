@@ -14,6 +14,7 @@ func Run() {
 			providers.NewConfig,
 			providers.NewDB,
 			providers.NewLogger,
+			providers.NewCryptByBCrypt,
 			services.NewAccount,
 			repositories.NewUser,
 		),

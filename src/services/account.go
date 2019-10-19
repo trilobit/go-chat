@@ -3,16 +3,16 @@ package services
 import (
 	"errors"
 	"strings"
-	"time"
 
 	"github.com/trilobit/go-chat/src/models"
+	"github.com/trilobit/go-chat/src/providers"
 	"github.com/trilobit/go-chat/src/repositories"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type (
+	// Account is interface for implementing registration and authorization functions
 	Account interface {
 		Register(email, password string) (*models.User, error)
 		Authorize(email, password string) (*models.User, error)
@@ -21,13 +21,16 @@ type (
 	accountService struct {
 		repo   repositories.User
 		logger *zap.SugaredLogger
+		crypt  providers.Crypt
 	}
 
+	// AccountOptions is config for creating AccountService
 	AccountOptions struct {
 		fx.In
 
 		Logger *zap.SugaredLogger
 		Repo   repositories.User
+		Crypt  providers.Crypt
 	}
 )
 
@@ -42,10 +45,12 @@ var (
 	ErrUnauthorized = errors.New("unauthorized")
 )
 
+// NewAccount creates instance of accountService
 func NewAccount(options AccountOptions) Account {
 	return &accountService{
 		repo:   options.Repo,
 		logger: options.Logger.Named("account_service"),
+		crypt:  options.Crypt,
 	}
 }
 
@@ -58,7 +63,7 @@ func (as *accountService) Register(email, password string) (*models.User, error)
 		return nil, ErrTooShorPassword
 	}
 
-	pswdHash, err := hashPassword(password)
+	pswdHash, err := as.crypt.Hash(password)
 	if err != nil {
 		return nil, err
 	}
@@ -69,14 +74,13 @@ func (as *accountService) Register(email, password string) (*models.User, error)
 func (as *accountService) Authorize(email, password string) (*models.User, error) {
 	user, err := as.repo.FindByEmail(email)
 	if err != nil {
-		// as.logger.Errorf("Error in search user: %v", err)
 		return nil, ErrUnauthorized
 	}
-	if !checkPassword(password, user.Pswd) {
+	if !as.crypt.Compare(password, user.Pswd) {
 		return nil, ErrUnauthorized
 	}
 
-	token, err := generateToken()
+	token, err := as.crypt.Hash(email)
 	if err != nil {
 		return nil, err
 	}
@@ -86,19 +90,4 @@ func (as *accountService) Authorize(email, password string) (*models.User, error
 	}
 
 	return user, nil
-}
-
-func hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
-}
-
-func checkPassword(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
-}
-
-func generateToken() (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(time.Now().String()), 4)
-	return string(bytes), err
 }
