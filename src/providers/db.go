@@ -1,12 +1,16 @@
 package providers
 
-import "github.com/go-pg/pg"
+import (
+	"github.com/go-pg/pg"
+	"github.com/spf13/viper"
+)
 
-func NewDB(config *Config) (*pg.DB, error) {
+func NewDB(config *viper.Viper) (*pg.DB, error) {
 	conn := pg.Connect(&pg.Options{
-		User:     config.DbUser,
-		Password: config.DbPassword,
-		Database: config.DbName,
+		Addr:     config.GetString("db.addr"),
+		User:     config.GetString("db.user"),
+		Password: config.GetString("db.password"),
+		Database: config.GetString("db.name"),
 	})
 
 	if _, err := conn.ExecOne("SELECT 1"); err != nil {

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/labstack/echo"
-	"github.com/trilobit/go-chat/src/providers"
+	"github.com/spf13/viper"
 	"github.com/trilobit/go-chat/src/repositories"
 	"github.com/trilobit/go-chat/src/services"
 	"go.uber.org/fx"
@@ -14,16 +14,16 @@ import (
 type (
 	Api struct {
 		logger         *zap.SugaredLogger
-		config         *providers.Config
+		config         *viper.Viper
 		accountService services.Account
 		userRepo       repositories.User
 	}
 
-	ApiOptions struct {
+	Options struct {
 		fx.In
 
 		Logger         *zap.SugaredLogger
-		Config         *providers.Config
+		Config         *viper.Viper
 		AccountService services.Account
 		UserRepo       repositories.User
 		Lc             fx.Lifecycle
@@ -35,7 +35,7 @@ type (
 	}
 )
 
-func NewApi(options ApiOptions) {
+func NewApi(options Options) {
 	a := &Api{
 		logger:         options.Logger.Named("api"),
 		config:         options.Config,
@@ -55,9 +55,9 @@ func NewApi(options ApiOptions) {
 	// Start & Stop server
 	options.Lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			options.Logger.Infof("starting server at: %s", options.Config.ListenAddr)
+			options.Logger.Infof("starting server at: %s", options.Config.GetString("api.addr"))
 
-			go e.Start(options.Config.ListenAddr) // todo why?
+			go e.Start(options.Config.GetString("api.addr"))
 
 			return nil
 		},

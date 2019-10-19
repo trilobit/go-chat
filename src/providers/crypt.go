@@ -1,6 +1,7 @@
 package providers
 
 import (
+	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -15,18 +16,12 @@ type (
 	CryptByBCrypt struct {
 		complexity int
 	}
-
-	// CryptByBCryptOptions struct {
-	// 	fx.In
-
-	// 	Complexity int
-	// }
 )
 
 // NewCryptByBCrypt creates a new hasher with bcrypt inside
-func NewCryptByBCrypt(config *Config) Crypt {
+func NewCryptByBCrypt(config *viper.Viper) Crypt {
 	return &CryptByBCrypt{
-		complexity: config.Complexity,
+		complexity: config.GetInt("hash.complexity"),
 	}
 }
 
