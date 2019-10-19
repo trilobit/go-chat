@@ -5,6 +5,7 @@ import (
 	"github.com/trilobit/go-chat/src/providers"
 	"github.com/trilobit/go-chat/src/repositories"
 	"github.com/trilobit/go-chat/src/services"
+	"github.com/trilobit/go-chat/src/ws"
 	"go.uber.org/fx"
 )
 
@@ -21,6 +22,7 @@ func Run() {
 
 		fx.Invoke(
 			api.NewApi,
+			ws.New,
 		),
 	)
 

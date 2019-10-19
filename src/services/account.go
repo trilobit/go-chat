@@ -74,18 +74,22 @@ func (as *accountService) Register(email, password string) (*models.User, error)
 func (as *accountService) Authorize(email, password string) (*models.User, error) {
 	user, err := as.repo.FindByEmail(email)
 	if err != nil {
+		as.logger.Errorf("error 1: %v", err)
 		return nil, ErrUnauthorized
 	}
 	if !as.crypt.Compare(password, user.Pswd) {
+		as.logger.Error("error 2:")
 		return nil, ErrUnauthorized
 	}
 
 	token, err := as.crypt.Hash(email)
 	if err != nil {
+		as.logger.Errorf("error 3: %v", err)
 		return nil, err
 	}
 
 	if err := as.repo.UpdateToken(user, token); err != nil {
+		as.logger.Errorf("error 4: %v", err)
 		return nil, err
 	}
 

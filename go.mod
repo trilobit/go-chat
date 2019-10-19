@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/go-pg/pg v8.0.6+incompatible
 	github.com/golang/mock v1.3.1
+	github.com/gorilla/websocket v1.4.0
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.3.0 // indirect
