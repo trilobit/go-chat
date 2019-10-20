@@ -10,47 +10,49 @@ import (
 	"go.uber.org/zap"
 	"net/http"
 	"sync"
-	"time"
 )
 
 type (
-	Message struct {
-		From     string    `json:"from"`
-		To       string    `json:"to"`
-		Text     string    `json:"text"`
-		DateTime time.Time `json:"date_time"`
-	}
-
 	User struct {
 		Model *models.User
 		Conn  *websocket.Conn
 	}
 
 	Websocket struct {
-		logger   *zap.SugaredLogger
-		config   *viper.Viper
-		userRepo repositories.User
-		history  []Message
-		hub      map[string]User
-		hmu      sync.RWMutex
+		logger      *zap.SugaredLogger
+		config      *viper.Viper
+		userRepo    repositories.User
+		historyRepo repositories.History
+		history     []models.Message
+		hub         map[string]User
+		hmu         sync.RWMutex
 	}
 
 	Options struct {
 		fx.In
 
-		Logger   *zap.SugaredLogger
-		Config   *viper.Viper
-		Lc       fx.Lifecycle
-		UserRepo repositories.User
+		Logger      *zap.SugaredLogger
+		Config      *viper.Viper
+		Lc          fx.Lifecycle
+		UserRepo    repositories.User
+		HistoryRepo repositories.History
 	}
 )
 
 func New(options Options) {
+	// Load history of public messages
+	history, err := options.HistoryRepo.Load()
+	if err != nil {
+		options.Logger.Errorf("error on load history from db: %v", err)
+	}
+
 	socket := &Websocket{
-		logger:   options.Logger,
-		config:   options.Config,
-		hub:      make(map[string]User),
-		userRepo: options.UserRepo,
+		logger:      options.Logger,
+		config:      options.Config,
+		hub:         make(map[string]User),
+		userRepo:    options.UserRepo,
+		historyRepo: options.HistoryRepo,
+		history:     history,
 	}
 
 	options.Lc.Append(fx.Hook{

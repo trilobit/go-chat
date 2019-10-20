@@ -7,7 +7,7 @@
         <input id="token" type="text" />
         <button id="connect">Connect</button>
         <br><br>
-        <div id="chat" style="width: 600px; height: 600px; background: #ccc; margin-bottom:10px;">
+        <div id="chat" style="width: 800px; height: 600px; background: #ccc; margin-bottom:10px;">
 
         </div>
         <div>
@@ -30,12 +30,16 @@
                         try {
                             const msg = JSON.parse(message.data);
                             const p = document.createElement("p");
-                            if (msg.to === "") {
-                                p.innerHTML += msg.from + ": ";
+                            if (msg.from === "system") {
+                                p.innerHTML = `<i>${msg.from} [${msg.date_time}]: ${msg.text}</i>`
                             } else {
-                                p.innerHTML += "<b>" + msg.from + " -> " + msg.to + "</b>: ";
+                                if (msg.to === "") {
+                                    p.innerHTML += msg.from + ": ";
+                                } else {
+                                    p.innerHTML += "<b>" + msg.from + " -> " + msg.to + "</b>: ";
+                                }
+                                p.innerHTML += "[" + msg.date_time + "]: " + msg.text;
                             }
-                            p.innerHTML += "[" + msg.date_time + "]: " + msg.text;
                             chat.appendChild(p);
                         } catch (e) {
                             console.error(e);

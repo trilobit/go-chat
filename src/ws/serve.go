@@ -1,13 +1,17 @@
 package ws
 
 import (
+	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/trilobit/go-chat/src/models"
 	"net/http"
 	"time"
 )
 
 var (
 	upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
@@ -21,7 +25,9 @@ func (s *Websocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.logger.Error("error creating upgrader: %v", err)
 		return
 	}
-	defer c.Close()
+	defer func() {
+		_ = c.Close()
+	}()
 
 	// Authentication
 	token := r.URL.Query().Get("token")
@@ -48,11 +54,12 @@ func (s *Websocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			s.logger.Errorf("error sending history: %v", err)
 		}
 	}
+	s.system(fmt.Sprintf("> User <b>%s</b> enter the room.", user.Email))
 
 	// Message handling
 	s.logger.Info("start listening for incoming messages")
 	for {
-		var msg Message
+		var msg models.Message
 
 		if err := c.ReadJSON(&msg); err != nil {
 			s.logger.Errorf("error handling message: %v", err)
@@ -62,40 +69,80 @@ func (s *Websocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.logger.Infof("got incoming message: %v", msg)
 
 		msg.From = user.Email
-		msg.DateTime = time.Now()
+		msg.CreatedAt = time.Now()
 		if msg.To != "" {
-			// Send message as private
-			s.hmu.RLock()
-			userTo, ok := s.hub[msg.To]
-			s.hmu.RUnlock()
-
-			if !ok {
-				s.logger.Errorf("unnown user to send message: %s", msg.To)
-				continue
-			}
-
-			// Write to sender
-			if err := c.WriteJSON(msg); err != nil {
-				s.logger.Errorf("error sending message: %v", err)
-			}
-
-			// Write to receiver
-			if err := userTo.Conn.WriteJSON(msg); err != nil {
-				s.logger.Errorf("error sending message: %v", err)
-			}
+			s.direct(msg)
 		} else {
-			// Send message as public
-			s.hmu.RLock()
-
-			for _, user := range s.hub {
-				if err := user.Conn.WriteJSON(msg); err != nil {
-					s.logger.Error("error sending message: %v", err)
-					continue
-				}
-			}
-
-			s.history = append(s.history, msg)
-			s.hmu.RUnlock()
+			s.broadcast(msg)
 		}
+	}
+}
+
+// broadcast sends message for every connected user
+func (s *Websocket) broadcast(msg models.Message) {
+	s.hmu.RLock()
+
+	for _, receiver := range s.hub {
+		if err := receiver.Conn.WriteJSON(msg); err != nil {
+			s.logger.Errorf("error sending message: %v", err)
+			continue
+		}
+	}
+
+	s.history = append(s.history, msg)
+	if err := s.historyRepo.Add(msg); err != nil {
+		s.logger.Errorf("error writing history to db: %v", err)
+	}
+
+	s.hmu.RUnlock()
+}
+
+// broadcast sends message for every connected user
+func (s *Websocket) system(text string) {
+	msg := models.Message{
+		ID:        0,
+		From:      "system",
+		To:        "",
+		Text:      text,
+		CreatedAt: time.Now(),
+	}
+
+	s.hmu.RLock()
+
+	for _, receiver := range s.hub {
+		if err := receiver.Conn.WriteJSON(msg); err != nil {
+			s.logger.Errorf("error sending message: %v", err)
+			continue
+		}
+	}
+
+	s.hmu.RUnlock()
+}
+
+// direct sends private message from user to user
+func (s *Websocket) direct(msg models.Message) {
+	s.hmu.RLock()
+	userFrom, okFrom := s.hub[msg.From]
+	userTo, okTo := s.hub[msg.To]
+	s.hmu.RUnlock()
+
+	if !okFrom {
+		s.logger.Errorf("unnown user from send message: %s", msg.From)
+		return
+	}
+
+	if !okTo {
+		s.logger.Errorf("unnown user to send message: %s", msg.To)
+		return
+	}
+
+	// Write to sender
+	if err := userFrom.Conn.WriteJSON(msg); err != nil {
+		s.logger.Errorf("error sending message: %v", err)
+	}
+
+	// Write to receiver
+	if err := userTo.Conn.WriteJSON(msg); err != nil {
+		s.logger.Errorf("error sending message: %v", err)
 	}
 }

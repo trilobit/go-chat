@@ -18,6 +18,7 @@ func Run() {
 			providers.NewCryptByBCrypt,
 			services.NewAccount,
 			repositories.NewUser,
+			repositories.NewHistory,
 		),
 
 		fx.Invoke(
