@@ -68,9 +68,9 @@ func (s *Websocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		s.logger.Infof("got incoming message: %v", msg)
 
-		msg.From = user.Email
+		msg.Sender = user.Email
 		msg.CreatedAt = time.Now()
-		if msg.To != "" {
+		if msg.Receiver != "" {
 			s.direct(msg)
 		} else {
 			s.broadcast(msg)
@@ -101,8 +101,8 @@ func (s *Websocket) broadcast(msg models.Message) {
 func (s *Websocket) system(text string) {
 	msg := models.Message{
 		ID:        0,
-		From:      "system",
-		To:        "",
+		Sender:    "system",
+		Receiver:  "",
 		Text:      text,
 		CreatedAt: time.Now(),
 	}
@@ -122,17 +122,17 @@ func (s *Websocket) system(text string) {
 // direct sends private message from user to user
 func (s *Websocket) direct(msg models.Message) {
 	s.hmu.RLock()
-	userFrom, okFrom := s.hub[msg.From]
-	userTo, okTo := s.hub[msg.To]
+	userFrom, okFrom := s.hub[msg.Sender]
+	userTo, okTo := s.hub[msg.Receiver]
 	s.hmu.RUnlock()
 
 	if !okFrom {
-		s.logger.Errorf("unnown user from send message: %s", msg.From)
+		s.logger.Errorf("unnown user from send message: %s", msg.Sender)
 		return
 	}
 
 	if !okTo {
-		s.logger.Errorf("unnown user to send message: %s", msg.To)
+		s.logger.Errorf("unnown user to send message: %s", msg.Receiver)
 		return
 	}
 
