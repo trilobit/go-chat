@@ -4,8 +4,32 @@ services:
   db:
     image: postgres
     container_name: go-chat-db
-    restart: always
     environment:
       POSTGRES_PASSWORD: password
     ports:
       - 5432:5432
+
+  chat:
+    image: gochat:latest
+    container_name: go-chat-bin
+    volumes:
+      - ./dev.config.yml:/config.yml
+    links:
+      - db
+    ports:
+      - 9090:9090
+      - 9091:9091
+
+  migrate:
+    container_name: go-chat-migrate
+    image: gochat:latest
+    entrypoint:
+      - /chat
+      - migrate:up
+    volumes:
+      - ./dev.config.yml:/config.yml
+      - ./migrations:/migrations
+    links:
+      - chat
+    depends_on:
+      - chat

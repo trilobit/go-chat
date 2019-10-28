@@ -21,3 +21,5 @@
 # vendor/
 
 config.yml
+dev.config.yml
+prod.config.yml

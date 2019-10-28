@@ -1,7 +1,7 @@
 db:
   user: postgres
   password: password
-  db: go_session
+  db: go_chat
   addr: 127.0.0.1:5432
 hash:
   complexity: 12
